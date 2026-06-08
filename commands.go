@@ -2,13 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/iceblade92/RSSGator/internal/config"
 )
-
-type state struct {
-	cfg *config.Config
-}
 
 type command struct {
 	Name string

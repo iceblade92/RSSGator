@@ -1,12 +1,20 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/iceblade92/RSSGator/internal/config"
+	"github.com/iceblade92/RSSGator/internal/database"
+	_ "github.com/lib/pq"
 )
+
+type state struct {
+	db  *database.Queries
+	cfg *config.Config
+}
 
 func main() {
 	cfg, err := config.Read()
@@ -14,11 +22,19 @@ func main() {
 		log.Fatalf("error reading config: %v", err)
 	}
 
-	s := state{cfg: &cfg}
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		fmt.Println("failed to open sql DB")
+	}
+	defer db.Close()
+	dbQueries := database.New(db)
+
+	s := state{cfg: &cfg, db: dbQueries}
 	cmds := commands{
 		registeredCommands: make(map[string]func(*state, command) error),
 	}
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("wrong amount of arguments")
