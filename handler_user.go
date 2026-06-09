@@ -51,3 +51,31 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 
 }
+
+func handlerReset(s *state, cmd command) error {
+	err := s.db.ResetUser(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't reset users: %w", err)
+	}
+	fmt.Println("Users Reset:")
+	return nil
+
+}
+
+func handlerListUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't fetch users: %w", err)
+	}
+	fmt.Println("Users List:")
+	for i := 0; i < len(users); i++ {
+		if users[i].Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", users[i].Name)
+		} else {
+			fmt.Printf("* %s\n", users[i].Name)
+		}
+
+	}
+	return nil
+
+}
