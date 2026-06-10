@@ -79,3 +79,14 @@ func handlerListUsers(s *state, cmd command) error {
 	return nil
 
 }
+
+func handlerFetchFeed(s *state, cmd command) error {
+	ctx := context.Background()
+	result, err := fetchFeed(ctx, "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("RSSFeed: %+v\n", *result)
+	return nil
+}
