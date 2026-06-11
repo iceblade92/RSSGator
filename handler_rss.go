@@ -101,3 +101,24 @@ func handlerAddFeed(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerListFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't find feeds: %w", err)
+	}
+
+	fmt.Println("Feeds List:")
+	for i := 0; i < len(feeds); i++ {
+		user, err := s.db.GetUserById(context.Background(), feeds[i].UserID)
+		if err != nil {
+			return fmt.Errorf("couldn't get user: %w", err)
+		}
+
+		fmt.Printf("Name: %s\n", feeds[i].Name)
+		fmt.Printf("Url: %s\n", feeds[i].Url)
+		fmt.Printf("Auther: %s\n", user.Name)
+
+	}
+	return nil
+}
