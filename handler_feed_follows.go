@@ -9,15 +9,9 @@ import (
 	"github.com/iceblade92/RSSGator/internal/database"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return fmt.Errorf("Function needs 1 argument")
-	}
-
-	user := s.cfg.CurrentUserName
-	resp, err := s.db.GetUser(context.Background(), user)
-	if err != nil {
-		return err
 	}
 
 	url := cmd.Args[0]
@@ -26,15 +20,13 @@ func handlerFollow(s *state, cmd command) error {
 		return err
 	}
 
-	createdFollow, err := s.db.CreateFeedFollow(
-		context.Background(),
-		database.CreateFeedFollowParams{
-			ID:        uuid.New(),
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-			UserID:    resp.ID,
-			FeedID:    feed.ID,
-		},
+	createdFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	},
 	)
 	if err != nil {
 		return err
@@ -44,18 +36,12 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 0 {
 		return fmt.Errorf("No need for extra arguments")
 	}
 
-	user := s.cfg.CurrentUserName
-	resp, err := s.db.GetUser(context.Background(), user)
-	if err != nil {
-		return err
-	}
-
-	follows, err := s.db.GetFeedFollowsForUser(context.Background(), resp.ID)
+	follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}

@@ -75,15 +75,9 @@ func handlerFetchFeed(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("Function needs 2 arguments")
-	}
-
-	user := s.cfg.CurrentUserName
-	resp, err := s.db.GetUser(context.Background(), user)
-	if err != nil {
-		return err
 	}
 
 	newfeed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
@@ -92,7 +86,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		UpdatedAt: time.Now().UTC(),
 		Name:      cmd.Args[0],
 		Url:       cmd.Args[1],
-		UserID:    resp.ID,
+		UserID:    user.ID,
 	})
 	if err != nil {
 		return err
@@ -102,7 +96,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		UserID:    resp.ID,
+		UserID:    user.ID,
 		FeedID:    newfeed.ID,
 	})
 	if err != nil {
